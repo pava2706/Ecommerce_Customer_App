@@ -18,4 +18,20 @@ public class Constants {
 	    }    
 	}
 	
+	public enum SubCategoryStatus {
+		ACTIVE("Active"),
+		DEACTIVATED("Deactivated");
+		
+		
+		private String status;
+
+	    SubCategoryStatus(String status) {
+	    	this.status = status;
+		}
+
+	    public String value() {
+	      return this.status;
+	    }    
+	}
+	
 }

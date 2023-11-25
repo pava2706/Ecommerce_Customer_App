@@ -1,17 +1,20 @@
 package com.Ecommerce_Cusomer_App.entity;
 
-import com.Ecommerce_Cusomer_App.utils.Constants.CategoryStatus;
+import java.math.BigDecimal;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
-@Data
 @Entity
-public class Category {
+@Data
+public class SubCategory {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,9 +24,17 @@ public class Category {
 
 	private String description;
 
-	@Column(name = "Category_Image")
+	@Column(name = "Sub_Category_Image")
 	private String image;
 
+	private BigDecimal price;
+	
+	private int quantity;
+
 	private String status;
+
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "category_id")
+	private Category category;
 
 }

@@ -2,6 +2,7 @@ package com.Ecommerce_Cusomer_App.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -19,8 +20,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.Ecommerce_Cusomer_App.dto.CategoryResponseDto;
 import com.Ecommerce_Cusomer_App.entity.Category;
+import com.Ecommerce_Cusomer_App.entity.SubCategory;
 import com.Ecommerce_Cusomer_App.repository.CategoryRepository;
 import com.Ecommerce_Cusomer_App.utils.Constants.CategoryStatus;
+import com.Ecommerce_Cusomer_App.utils.Constants.SubCategoryStatus;
 import com.Ecommerce_Cusomer_App.utils.CustomerUtils;
 
 @Lazy
@@ -32,6 +35,9 @@ public class CategoryService {
 
 	@Autowired
 	private StorageService storageService;
+
+	@Autowired
+	private SubCategoryService subCategoryService;
 
 	// private final Logger LOG = LoggerFactory.getLogger(CategoryService.class);
 
@@ -45,9 +51,7 @@ public class CategoryService {
 			Category cat = new Category();
 			List<Category> lst = categoryRepository.findAll();// List of Categories
 			for (Category name : lst) {
-				System.out.println(1);
 				if (name.getName().equals(category.getName())) {
-					System.out.println(2);
 					flag = false;
 					break;
 				}
@@ -60,7 +64,7 @@ public class CategoryService {
 				String img = storageService.store(image);
 				cat.setImage(img);
 				data = categoryRepository.save(cat);
-				return CustomerUtils.getResponseEntity("Category Added successfully", HttpStatus.OK);
+				return CustomerUtils.getResponseEntity("Category Added successfully:----->" + data, HttpStatus.OK);
 			}
 			return new ResponseEntity<Object>("Category " + category.getName() + " Is Already Exists...",
 					HttpStatus.BAD_REQUEST);
@@ -70,6 +74,8 @@ public class CategoryService {
 		}
 		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+
+	// Method to Update Category
 
 	public ResponseEntity<Object> updateCategoryDetails(Category category) {
 		try {
@@ -99,6 +105,8 @@ public class CategoryService {
 		}
 		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+
+	// Method to Update Category Image
 
 	public ResponseEntity<Object> updateCategoryImage(Long id, MultipartFile image) {
 		try {
@@ -137,11 +145,13 @@ public class CategoryService {
 
 	}
 
+	// Method To Fetch All Categories
+
 	public ResponseEntity<Object> fetchAllCategory() {
 		try {
 			CategoryResponseDto response = new CategoryResponseDto();
-			List<Category> categories = getAllCAtegoriesByStatusIn(Arrays.asList(CategoryStatus.ACTIVE.value()));
-
+			List<Category> categories = getAllCategoriesByStatusIn(Arrays.asList(CategoryStatus.ACTIVE.value()));
+			System.out.println(categories);
 			if (CollectionUtils.isEmpty(categories)) {
 
 				return new ResponseEntity<Object>("No Category found", HttpStatus.NOT_FOUND);
@@ -156,7 +166,7 @@ public class CategoryService {
 		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	private List<Category> getAllCAtegoriesByStatusIn(List<String> status) {
+	private List<Category> getAllCategoriesByStatusIn(List<String> status) {
 		return categoryRepository.findByStatusIn(status);
 	}
 
@@ -168,15 +178,33 @@ public class CategoryService {
 				return new ResponseEntity<Object>("missing input", HttpStatus.BAD_REQUEST);
 			}
 
-			Category category = categoryRepository.findById(categoryId).get();
-			if (category == null) {
+			Optional<Category> categ = categoryRepository.findById(categoryId);
+			if (categ.isEmpty()) {
 				return new ResponseEntity<Object>("Category not found, failed to delete the Category",
 						HttpStatus.NOT_FOUND);
-			} else {
-				categoryRepository.delete(category);
-				storageService.delete(category.getImage());
-				return CustomerUtils.getResponseEntity("Category Deleted Successful", HttpStatus.OK);
 			}
+			Category category = categ.get();
+
+			List<SubCategory> subc = new ArrayList<>();
+
+			subc = subCategoryService.getAllSubCategoriesByCategoryAndStatusIn(category,
+					Arrays.asList(SubCategoryStatus.ACTIVE.value()));
+
+			category.setStatus(CategoryStatus.DEACTIVATED.value());
+
+			Category deletedCategory = categoryRepository.save(category);
+
+			if (!subc.isEmpty()) {
+				for (SubCategory subCategory : subc) {
+					subCategory.setStatus(SubCategoryStatus.DEACTIVATED.value());
+				}
+			}
+
+			if (deletedCategory == null) {
+				return CustomerUtils.getResponseEntity("Category is Not Deleted..", HttpStatus.OK);
+			}
+
+			return CustomerUtils.getResponseEntity("Category Deleted Successful", HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -189,11 +217,8 @@ public class CategoryService {
 
 	public ResponseEntity<byte[]> fetchCategoryImage(String CategoryImageName) {
 		try {
-//			Category cat = categoryRepository.findByName(foodImageName);
-//			System.out.println(cat);
 			Resource resource = storageService.load(CategoryImageName);
-			System.out.println(resource);
-			System.out.println(CategoryImageName);
+
 			if (resource != null && resource.exists()) {
 				try (InputStream in = resource.getInputStream()) {
 					byte[] imageBytes = IOUtils.toByteArray(in);
@@ -219,9 +244,11 @@ public class CategoryService {
 			Optional<Category> cate = categoryRepository.findById(id);
 			if (cate.isEmpty()) {
 				return new ResponseEntity<Object>("No Category found", HttpStatus.NOT_FOUND);
-			} else {
-				return new ResponseEntity<Object>(cate, HttpStatus.OK);
+			} else if (cate.get().getStatus() != CategoryStatus.ACTIVE.value()) {
+				return new ResponseEntity<Object>("Category is Not found", HttpStatus.NOT_FOUND);
+
 			}
+			return new ResponseEntity<Object>(cate, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
