@@ -18,4 +18,14 @@ public class ApplicationConfig implements WebMvcConfigurer {
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(requestHeaderInterceptor);
 	}
+	
+//	@Value("${google.maps.api.key}")
+//    private String googleMapsApiKey;
+//
+//    @Bean
+//    public GeoApiContext geoApiContext() {
+//        return new GeoApiContext.Builder()
+//                .apiKey(googleMapsApiKey)
+//                .build();
+//    }
 }

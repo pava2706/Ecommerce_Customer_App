@@ -20,133 +20,169 @@ import com.Ecommerce_Cusomer_App.utils.CustomerUtils;
 
 @Service
 public class LocationService {
-
+	
 	@Autowired
-	private LocationRepository locationRepository;
+    private LocationRepository locationRepository;
 
-	@Autowired
-	private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-	public LocationService(LocationRepository locationRepository) {
-		this.locationRepository = locationRepository;
-	}
+    @Autowired
+    private GeocodingService geocodingService;
 
-	// Create a location
-	public ResponseEntity<Object> createLocation(Location location, Long customerid) {
+    public ResponseEntity<Object> createLocationWithGeocoding(Location location, Long customerId) {
+        try {
+            if (location == null) {
+                return new ResponseEntity<>("missing input", HttpStatus.BAD_REQUEST);
+            }
 
-		try {
-			if (location == null) {
-				return new ResponseEntity<Object>("missing input", HttpStatus.BAD_REQUEST);
-			}
-			Optional<User> customer = userRepository.findById(customerid);
+            Optional<User> customer = userRepository.findById(customerId);
+            if (customer.isEmpty()) {
+                return new ResponseEntity<>("Customer is not present, cannot add location", HttpStatus.BAD_REQUEST);
+            }
 
-			if (customer.isEmpty()) {
-				return new ResponseEntity<Object>("Customer is not present u can't add location",
-						HttpStatus.BAD_REQUEST);
-			}
+            double[] latLong = geocodingService.getLatLong(location.getStreet() + ", " + location.getCity() + ", " + location.getCountry());
 
-			Location loc = new Location();
-			loc.setAddress(location.getAddress());
-			loc.setLatitude(location.getLatitude());
-			loc.setLongitude(location.getLongitude());
-			loc.setCustomer(customer.get());
-			loc.setStatus(LocationStatus.ACTIVE.value());
+            Location loc = new Location();
+            loc.setStreet(location.getStreet());
+            loc.setCity(location.getCity());
+            loc.setCountry(location.getCountry());
+            loc.setLatitude(latLong[0]);
+            loc.setLongitude(latLong[1]);
+            loc.setCustomer(customer.get());
+            loc.setStatus(LocationStatus.ACTIVE.value());
 
-			Location data = locationRepository.save(loc);
-			return CustomerUtils.getResponseEntity("Location Added successfully :-------->" + data, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
+            Location savedLocation = locationRepository.save(loc);
+            return ResponseEntity.ok("Location Added successfully: " + savedLocation);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("SOMETHING_WENT_WRONG");
+    }
 
-	}
 
 	// Get all locations
-	public ResponseEntity<Object> getAllLocations() {
-		try {
-			List<Location> locations = locationRepository.findAll();
+    public ResponseEntity<Object> getAllLocationsWithGeocoding() {
+        try {
+            List<Location> locations = locationRepository.findAll();
 
-			LocationResponseDto response = new LocationResponseDto();
+            if (CollectionUtils.isEmpty(locations)) {
+                return new ResponseEntity<>("No locations found", HttpStatus.NOT_FOUND);
+            }
 
-			if (CollectionUtils.isEmpty(locations)) {
+            for (Location location : locations) {
+                double[] latLong = geocodingService.getLatLong(location.getStreet() + ", " + location.getCity() + ", " + location.getCountry());
+                location.setLatitude(latLong[0]);
+                location.setLongitude(latLong[1]);
+            }
 
-				return new ResponseEntity<Object>("No locations found", HttpStatus.NOT_FOUND);
-			}
-			response.setLocation(locations);
-			return new ResponseEntity<Object>(response, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
+            LocationResponseDto response = new LocationResponseDto();
+            response.setLocation(locations);
 
-	}
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("SOMETHING_WENT_WRONG");
+    }
+
 
 	// Get location by ID
-	public ResponseEntity<Object> getLocationById(Long id) {
+    public ResponseEntity<Object> getLocationByIdWithGeocoding(Long id) {
+        try {
+            if (id == 0) {
+                return new ResponseEntity<>("missing input", HttpStatus.BAD_REQUEST);
+            }
 
-		try {
-			if (id == 0) {
-				return new ResponseEntity<Object>("missing input", HttpStatus.BAD_REQUEST);
-			}
-			Optional<Location> location = locationRepository.findById(id);
-			if (location.isEmpty()) {
-				return new ResponseEntity<Object>("No locations found", HttpStatus.NOT_FOUND);
-			}
-			return new ResponseEntity<Object>(location.get(), HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
+            Optional<Location> locationOptional = locationRepository.findById(id);
+            if (locationOptional.isEmpty()) {
+                return new ResponseEntity<>("No locations found", HttpStatus.NOT_FOUND);
+            }
 
-	}
+            Location location = locationOptional.get();
+            double[] latLong = geocodingService.getLatLong(location.getStreet() + ", " + location.getCity() + ", " + location.getCountry());
+            location.setLatitude(latLong[0]);
+            location.setLongitude(latLong[1]);
+
+            return ResponseEntity.ok(location);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("SOMETHING_WENT_WRONG");
+    }
+
 
 	// Update location by ID
-	public ResponseEntity<Object> updateLocation(Long id, Location locationDetails) {
-		try {
+    public ResponseEntity<Object> updateLocationWithGeocoding(Long id, Location locationDetails) {
+        try {
+            if (id == 0 || locationDetails == null) {
+                return new ResponseEntity<>("missing input", HttpStatus.BAD_REQUEST);
+            }
 
-			if (id == 0 || locationDetails == null) {
-				return new ResponseEntity<Object>("missing input", HttpStatus.BAD_REQUEST);
-			}
-			Optional<Location> loc = locationRepository.findById(id);
-			if (loc.isEmpty()) {
-				return new ResponseEntity<Object>("No location found,U can't update it", HttpStatus.NOT_FOUND);
-			}
-			Location location = loc.get();
-			location.setAddress(locationDetails.getAddress());
-			location.setLatitude(locationDetails.getLatitude());
-			location.setLongitude(locationDetails.getLongitude());
-			location.setStatus(location.getStatus());
-			Location data = locationRepository.save(location);
-			return CustomerUtils.getResponseEntity("Location Updated successfully :-------->" + data, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
+            Optional<Location> locOptional = locationRepository.findById(id);
+            if (locOptional.isEmpty()) {
+                return new ResponseEntity<>("No location found, unable to update", HttpStatus.NOT_FOUND);
+            }
 
-	}
+            Location location = locOptional.get();
+            double[] latLong = geocodingService.getLatLong(locationDetails.getStreet() + ", " + locationDetails.getCity() + ", " + locationDetails.getCountry());
+            location.setStreet(locationDetails.getStreet());
+            location.setCity(locationDetails.getCity());
+            location.setCountry(locationDetails.getCountry());
+            location.setLatitude(latLong[0]);
+            location.setLongitude(latLong[1]);
+
+            Location updatedLocation = locationRepository.save(location);
+            return ResponseEntity.ok("Location Updated successfully: " + updatedLocation);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("SOMETHING_WENT_WRONG");
+    }
+
 
 	// Delete location by ID
-	public ResponseEntity<Object> deleteLocation(Long id) {
-		try {
+    public ResponseEntity<Object> deleteLocationById(Long id) {
+        try {
+            if (id == 0) {
+                return new ResponseEntity<>("missing input", HttpStatus.BAD_REQUEST);
+            }
 
-			if (id == 0) {
-				return new ResponseEntity<Object>("missing input", HttpStatus.BAD_REQUEST);
-			}
+            Optional<Location> locationOptional = locationRepository.findById(id);
+            if (locationOptional.isEmpty()) {
+                return new ResponseEntity<>("No location found, unable to delete", HttpStatus.NOT_FOUND);
+            }
 
-			Optional<Location> loc = locationRepository.findById(id);
-			if (loc.isEmpty()) {
-				return new ResponseEntity<Object>("No location found,Unable to delete", HttpStatus.NOT_FOUND);
-			}
-			Location location = loc.get();
-			location.setCustomer(null);
-			locationRepository.save(location);
-			locationRepository.delete(location);
-			return CustomerUtils.getResponseEntity("Location Deleted successfully", HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+            Location location = locationOptional.get();
+            location.setCustomer(null);
+            locationRepository.save(location);
+            locationRepository.delete(location);
+
+            return ResponseEntity.ok("Location Deleted successfully");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("SOMETHING_WENT_WRONG");
+    }
+
+    
+    public ResponseEntity<Object> deleteAllLocations() {
+        try {
+            List<Location> locations = locationRepository.findAll();
+
+            if (CollectionUtils.isEmpty(locations)) {
+                return new ResponseEntity<>("No locations found", HttpStatus.NOT_FOUND);
+            }
+
+            locationRepository.deleteAll(locations);
+
+            return ResponseEntity.ok("All Locations Deleted successfully");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("SOMETHING_WENT_WRONG");
+    }
+
 
 	public ResponseEntity<Object> statusUpdate(Long id) {
 		try {

@@ -17,10 +17,12 @@ public class Location {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String address; 
+	private String street;
+	private String city;
+	private String country;
 	private double latitude;
 	private double longitude;
-	
+
 	private String status;
 
 	@ManyToOne(cascade = CascadeType.ALL)
