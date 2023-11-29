@@ -14,4 +14,6 @@ public interface SubCategoryRepository extends JpaRepository<SubCategory, Long> 
 	List<SubCategory> findByCategoryAndStatusIn(Category category, List<String> status);
 
 	SubCategory findByName(String name);
+
+	List<SubCategory> findByNameContainingIgnoreCaseAndStatusIn(String name, List<String> status);
 }

@@ -1,7 +1,5 @@
 package com.Ecommerce_Cusomer_App.entity;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,19 +12,16 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Admin {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String name;
-	private String phoneNumber;
 	private String email;
-	private String otp;
-	private LocalDateTime expiryTime;
-	private String Role;
+	private String password;
 	private String status;
-
+	private String Role;
 //	private boolean signedIn; // Flag to indicate if the user is currently signed in
 //	private String sessionToken; // Token for maintaining user session
 

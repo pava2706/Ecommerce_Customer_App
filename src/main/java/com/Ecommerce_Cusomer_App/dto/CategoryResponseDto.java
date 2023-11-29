@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.Ecommerce_Cusomer_App.entity.Category;
-import com.Ecommerce_Cusomer_App.entity.SubCategory;
 
 import lombok.Data;
 

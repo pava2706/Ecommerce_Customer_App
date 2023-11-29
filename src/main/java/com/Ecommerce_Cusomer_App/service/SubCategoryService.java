@@ -24,6 +24,7 @@ import com.Ecommerce_Cusomer_App.repository.CategoryRepository;
 import com.Ecommerce_Cusomer_App.repository.SubCategoryRepository;
 import com.Ecommerce_Cusomer_App.utils.Constants.CategoryStatus;
 import com.Ecommerce_Cusomer_App.utils.Constants.SubCategoryStatus;
+import com.Ecommerce_Cusomer_App.utils.Constants.UserStatus;
 import com.Ecommerce_Cusomer_App.utils.CustomerUtils;
 
 @Lazy
@@ -236,7 +237,12 @@ public class SubCategoryService {
 				return new ResponseEntity<>("missing input", HttpStatus.BAD_REQUEST);
 			}
 
-			Category catid = categoryRepository.findById(categoryid).get();
+			Optional<Category> cat = categoryRepository.findById(categoryid);
+			if (cat.isEmpty()) {
+				return new ResponseEntity<>("No Category Present in this id:--> " + categoryid, HttpStatus.BAD_REQUEST);
+			}
+
+			Category catid = cat.get();
 
 			SubCategoryResponseDto response = new SubCategoryResponseDto();
 
@@ -268,11 +274,11 @@ public class SubCategoryService {
 			if (id == 0) {
 				return new ResponseEntity<>("missing input", HttpStatus.BAD_REQUEST);
 			}
-			SubCategory category = subCategoryRepository.findById(id).get();
-			if (category == null) {
+			Optional<SubCategory> category = subCategoryRepository.findById(id);
+			if (category.isEmpty()) {
 				return new ResponseEntity<Object>("No SubCategories found", HttpStatus.NOT_FOUND);
 			}
-			return new ResponseEntity<Object>(category, HttpStatus.OK);
+			return new ResponseEntity<Object>(category.get(), HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -341,6 +347,62 @@ public class SubCategoryService {
 			e.printStackTrace();
 		}
 		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	// Method to fetch SubCategory by SubCategory Name
+
+	public ResponseEntity<Object> findByName(String name) {
+		try {
+			List<SubCategory> categories = findByNameContainingIgnoreCaseAndStatusIn(name,
+					Arrays.asList(SubCategoryStatus.ACTIVE.value()));
+
+			SubCategoryResponseDto response = new SubCategoryResponseDto();
+
+			if (CollectionUtils.isEmpty(categories)) {
+
+				return new ResponseEntity<Object>("No Category found", HttpStatus.NOT_FOUND);
+			}
+
+			response.setCategories(categories);
+			System.out.println(response);
+			return new ResponseEntity<Object>(response, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
+
+	}
+
+	private List<SubCategory> findByNameContainingIgnoreCaseAndStatusIn(String name, List<String> status) {
+
+		return subCategoryRepository.findByNameContainingIgnoreCaseAndStatusIn(name, status);
+	}
+
+	public ResponseEntity<Object> statusUpdate(Long id) {
+		try {
+			if (id == 0) {
+				return new ResponseEntity<>("Missing Input", HttpStatus.BAD_REQUEST);
+			}
+			Optional<SubCategory> sub = subCategoryRepository.findById(id);
+
+			if (sub.isEmpty()) {
+				return new ResponseEntity<Object>("No User Found", HttpStatus.NOT_FOUND);
+			}
+
+			SubCategory ad = sub.get();
+			if (ad.getStatus().contains(UserStatus.ACTIVE.value())) {
+				ad.setStatus(UserStatus.DEACTIVATED.value());
+			} else {
+				ad.setStatus(UserStatus.ACTIVE.value());
+			}
+			subCategoryRepository.save(ad);
+			return new ResponseEntity<>("Status " + ad.getStatus() + " sucessfully", HttpStatus.OK);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
+
 	}
 
 }

@@ -19,9 +19,11 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.Ecommerce_Cusomer_App.dto.CategoryResponseDto;
+import com.Ecommerce_Cusomer_App.entity.Admin;
 import com.Ecommerce_Cusomer_App.entity.Category;
 import com.Ecommerce_Cusomer_App.entity.SubCategory;
 import com.Ecommerce_Cusomer_App.repository.CategoryRepository;
+import com.Ecommerce_Cusomer_App.utils.Constants.AdminStatus;
 import com.Ecommerce_Cusomer_App.utils.Constants.CategoryStatus;
 import com.Ecommerce_Cusomer_App.utils.Constants.SubCategoryStatus;
 import com.Ecommerce_Cusomer_App.utils.CustomerUtils;
@@ -271,6 +273,63 @@ public class CategoryService {
 			e.printStackTrace();
 		}
 		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	// Method to fetch Category by Category Name
+
+	public ResponseEntity<Object> findByName(String name) {
+
+		try {
+			List<Category> categories = findByNameContainingIgnoreCaseAndStatusIn(name,
+					Arrays.asList(SubCategoryStatus.ACTIVE.value()));
+
+			CategoryResponseDto response = new CategoryResponseDto();
+
+			if (CollectionUtils.isEmpty(categories)) {
+
+				return new ResponseEntity<Object>("No Category found", HttpStatus.NOT_FOUND);
+			}
+
+			response.setCategories(categories);
+			System.out.println(response);
+			return new ResponseEntity<Object>(response, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
+
+	}
+
+	private List<Category> findByNameContainingIgnoreCaseAndStatusIn(String name, List<String> status) {
+
+		return categoryRepository.findByNameContainingIgnoreCaseAndStatusIn(name, status);
+	}
+
+	public ResponseEntity<Object> statusUpdate(Long id) {
+		try {
+			if (id == 0) {
+				return new ResponseEntity<>("Missing Input", HttpStatus.BAD_REQUEST);
+			}
+			Optional<Category> cat = categoryRepository.findById(id);
+
+			if (cat.isEmpty()) {
+				return new ResponseEntity<Object>("No User Found", HttpStatus.NOT_FOUND);
+			}
+
+			Category ad = cat.get();
+			if (ad.getStatus().contains(CategoryStatus.ACTIVE.value())) {
+				ad.setStatus(CategoryStatus.DEACTIVATED.value());
+			} else {
+				ad.setStatus(CategoryStatus.ACTIVE.value());
+			}
+			categoryRepository.save(ad);
+			return new ResponseEntity<>("Status " + ad.getStatus() + " sucessfully", HttpStatus.OK);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
+
 	}
 
 }

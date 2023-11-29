@@ -13,4 +13,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 	List<Category> findByStatusIn(List<String> status);
 
 	Category findByNameAndStatus(String name, String status);
+
+	List<Category> findByNameContainingIgnoreCaseAndStatusIn(String name, List<String> status);
 }

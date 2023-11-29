@@ -69,6 +69,8 @@ public class CategoryController {
 		return categoryService.deleteAllCategory();
 	}
 
+	//Method to fetch image using image name
+	
 	@GetMapping("/fetch/image/{categoryImageName}")
 	public ResponseEntity<byte[]> fetchFoodImage(@PathVariable("categoryImageName") String categoryImageName,
 			HttpServletResponse resp) {
@@ -77,9 +79,23 @@ public class CategoryController {
 
 	}
 
+	//Method to fetch Category by using id
+	
 	@GetMapping("fetch/byid/{id}")
 	public ResponseEntity<Object> findById(@PathVariable("id") Long id) {
 		return categoryService.findById(id);
+	}
+	
+    //Method to fetch Category by Category Name
+	
+	@GetMapping("fetch/byname/{name}")
+	public ResponseEntity<Object> findByName(@PathVariable("name") String name) {
+		return categoryService.findByName(name);
+	}
+	
+	@PostMapping("/statusupdate/{id}")
+	public ResponseEntity<Object> statusUpdate(@PathVariable("id") Long id) {
+		return categoryService.statusUpdate(id);
 	}
 
 }

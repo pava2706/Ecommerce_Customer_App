@@ -11,4 +11,5 @@ import lombok.Data;
 public class SubCategoryResponseDto {
 
 	private List<SubCategory> categories = new ArrayList<>();
+
 }

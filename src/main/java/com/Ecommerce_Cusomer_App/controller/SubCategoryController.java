@@ -102,4 +102,17 @@ public class SubCategoryController {
 	public ResponseEntity<Object> findById(@PathVariable("id") Long id) {
 		return subcategoryService.findById(id);
 	}
+	
+	//Method to fetch SubCategory by SubCategory Name
+	
+		@GetMapping("fetch/byname/{name}")
+		public ResponseEntity<Object> findByName(@PathVariable("name") String name) {
+			return subcategoryService.findByName(name);
+		}
+		
+		@PostMapping("/statusupdate/{id}")
+		public ResponseEntity<Object> statusUpdate(@PathVariable("id") Long id) {
+			return subcategoryService.statusUpdate(id);
+		}
+	
 }
