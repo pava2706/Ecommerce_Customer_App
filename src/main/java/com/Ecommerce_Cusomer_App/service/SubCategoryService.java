@@ -329,7 +329,7 @@ public class SubCategoryService {
 
 	}
 
-	// Method to delete All Subcategories
+	// Method to delete All SubCategories
 
 	public ResponseEntity<Object> deleteAllSubCategory() {
 		try {
@@ -403,6 +403,39 @@ public class SubCategoryService {
 		}
 		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
 
+	}
+
+	public ResponseEntity<Object> updateQuantity(Long id, int quantity) {
+
+		try {
+			if (id == 0) {
+				return new ResponseEntity<>("Missing Input", HttpStatus.BAD_REQUEST);
+			}
+			SubCategory sub = subCategoryRepository.findByIdAndStatus(id, UserStatus.ACTIVE.value());
+
+			if (sub == null) {
+				return new ResponseEntity<Object>("No User Found", HttpStatus.NOT_FOUND);
+			}
+
+			sub.setQuantity(quantity);
+
+			SubCategory subCategory = subCategoryRepository.save(sub);
+			if (subCategory.getQuantity() != quantity) {
+				return new ResponseEntity<>("Failed to Update the quantity", HttpStatus.BAD_REQUEST);
+			}
+			return new ResponseEntity<>("Quantity Updated sucessfully,NO of Quantity = " + subCategory.getQuantity(),
+					HttpStatus.OK);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
+
+	}
+
+	public SubCategory getSubCategoryById(int id) {
+		
+		return subCategoryRepository.getSubCategoryById(id);
 	}
 
 }

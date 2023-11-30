@@ -110,9 +110,18 @@ public class SubCategoryController {
 			return subcategoryService.findByName(name);
 		}
 		
+		//Method to Update the Status by id
+		
 		@PostMapping("/statusupdate/{id}")
 		public ResponseEntity<Object> statusUpdate(@PathVariable("id") Long id) {
 			return subcategoryService.statusUpdate(id);
 		}
+		
+		//Method to Update the Quantity by id
+		
+				@PostMapping("/statusupdate/{id}/{quantity}")
+				public ResponseEntity<Object> updateQuantity(@PathVariable("id") Long id,@PathVariable("quantity") int quantity) {
+					return subcategoryService.updateQuantity(id,quantity);
+				}
 	
 }

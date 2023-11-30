@@ -12,7 +12,7 @@ import com.Ecommerce_Cusomer_App.utils.Constants.AdminStatus;
 import com.Ecommerce_Cusomer_App.utils.Constants.UserRole;
 import com.twilio.Twilio;
 
-@SpringBootApplication
+@SpringBootApplication 
 //@EnableSwagger2
 public class EcommerceCusomerAppApplication implements CommandLineRunner {
 

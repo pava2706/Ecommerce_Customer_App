@@ -7,6 +7,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+import java.io.ByteArrayInputStream;
+import java.util.Iterator;
+
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -19,11 +25,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.Ecommerce_Cusomer_App.dto.CategoryResponseDto;
-import com.Ecommerce_Cusomer_App.entity.Admin;
 import com.Ecommerce_Cusomer_App.entity.Category;
 import com.Ecommerce_Cusomer_App.entity.SubCategory;
 import com.Ecommerce_Cusomer_App.repository.CategoryRepository;
-import com.Ecommerce_Cusomer_App.utils.Constants.AdminStatus;
 import com.Ecommerce_Cusomer_App.utils.Constants.CategoryStatus;
 import com.Ecommerce_Cusomer_App.utils.Constants.SubCategoryStatus;
 import com.Ecommerce_Cusomer_App.utils.CustomerUtils;
@@ -180,7 +184,7 @@ public class CategoryService {
 				return new ResponseEntity<Object>("missing input", HttpStatus.BAD_REQUEST);
 			}
 
-			Optional<Category> categ = categoryRepository.findById(categoryId);
+			Optional<Category> categ = categoryRepository.findByIdAndStatus(categoryId, CategoryStatus.ACTIVE.value());
 			if (categ.isEmpty()) {
 				return new ResponseEntity<Object>("Category not found, failed to delete the Category",
 						HttpStatus.NOT_FOUND);
@@ -225,10 +229,13 @@ public class CategoryService {
 				try (InputStream in = resource.getInputStream()) {
 					byte[] imageBytes = IOUtils.toByteArray(in);
 
-					// Set appropriate content type based on the image type
-					// resp.setContentType("image/jpeg"); // Replace with the correct image type
+					// Detect the image type by inspecting its content
+					String imageFormat = getImageFormat(imageBytes);
+
+					// Set content type dynamically based on detected image format
+					MediaType mediaType = MediaType.parseMediaType("image/" + imageFormat.toLowerCase());
 					ResponseEntity<byte[]> imageResponseEntity = CustomerUtils.getImageResponseEntity(imageBytes,
-							MediaType.IMAGE_JPEG);
+							mediaType);
 					return imageResponseEntity;
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -241,16 +248,26 @@ public class CategoryService {
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
+	// Method to detect the image format based on its content
+	private String getImageFormat(byte[] imageBytes) throws IOException {
+		try (InputStream is = new ByteArrayInputStream(imageBytes);
+				ImageInputStream imageInputStream = ImageIO.createImageInputStream(is)) {
+			Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInputStream);
+			if (readers.hasNext()) {
+				ImageReader reader = readers.next();
+				return reader.getFormatName();
+			}
+		}
+		throw new IOException("Unknown image format");
+	}
+
 	public ResponseEntity<Object> findById(Long id) {
 		try {
-			Optional<Category> cate = categoryRepository.findById(id);
+			Optional<Category> cate = categoryRepository.findByIdAndStatus(id, CategoryStatus.ACTIVE.value());
 			if (cate.isEmpty()) {
 				return new ResponseEntity<Object>("No Category found", HttpStatus.NOT_FOUND);
-			} else if (cate.get().getStatus() != CategoryStatus.ACTIVE.value()) {
-				return new ResponseEntity<Object>("Category is Not found", HttpStatus.NOT_FOUND);
-
 			}
-			return new ResponseEntity<Object>(cate, HttpStatus.OK);
+			return new ResponseEntity<Object>(cate.get(), HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

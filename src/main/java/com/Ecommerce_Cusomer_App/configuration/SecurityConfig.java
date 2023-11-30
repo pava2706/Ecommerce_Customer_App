@@ -12,8 +12,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -33,8 +31,6 @@ public class SecurityConfig {
 	public UserDetailsService userDetailsService() {
 		return new CustomUserDetailsService();
 	}
-	
-	
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -43,16 +39,8 @@ public class SecurityConfig {
 
 				.authorizeHttpRequests(auth -> auth
 
-//						// this APIs are only accessible by ADMIN
-//						.requestMatchers("/api/user/admin/register","/api/user/delete/restaurant", "/api/order/fetch/all",
-//								"/api/category/update", "/api/category/add", "/api/category/delete")
-//						.hasAuthority(UserRole.ROLE_ADMIN.value())
-//						 
-
 						// this APIs are only accessible by CUSTOMER
-						.requestMatchers("/api/user/login", "/api/user/register", "/api/order/add",
-								"/api/order/fetch/user-wise", "/api/cart/update", "/api/cart/add", "/api/cart/fetch",
-								"/api/cart/delete", "/api/food/review/add")
+						.requestMatchers("/api/user/login", "/api/user/register")
 						.hasAuthority(UserRole.ROLE_CUSTOMER.value())
 
 						.anyRequest().permitAll())

@@ -20,12 +20,13 @@ public class CustomUserDetailsService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+	    User user = this.userService.getUserByEmailAndStatus(email, UserStatus.ACTIVE.value());
+	    CustomUserDetails customUserDetails = new CustomUserDetails(user);
 
-		User user = this.userService.getUserByEmailAndStatus(email, UserStatus.ACTIVE.value());
+	    // Assuming the user entity has a field for OTP
+	    customUserDetails.setOtp(user.getOtp()); // Set OTP in CustomUserDetails
 
-		CustomUserDetails customUserDetails = new CustomUserDetails(user);
-
-		return customUserDetails; 
-
+	    return customUserDetails;
 	}
+
 }

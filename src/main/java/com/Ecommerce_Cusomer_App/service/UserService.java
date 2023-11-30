@@ -48,7 +48,7 @@ public class UserService {
 				PhoneNumber recipientPhoneNumber = new PhoneNumber(user.getPhoneNumber());
 				PhoneNumber senderPhoneNumber = new PhoneNumber(twilioConfig.getPhoneNumber());
 				LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(5); // Set expiry time (5 minutes from now)
- 
+
 				String otp = generateOTP(); // Generate OTP
 				String otpMessage = "Dear Customer, Your One-Time Password is: " + otp + ". "
 						+ "Thank you for Using Our Service.";
@@ -403,6 +403,10 @@ public class UserService {
 		}
 		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
 
+	}
+
+	public User findByIdAndStatus(int userId, String status) {
+		return userRepository.findByIdAndStatus(userId, status);
 	}
 
 }

@@ -11,22 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.Ecommerce_Cusomer_App.entity.Admin;
 import com.Ecommerce_Cusomer_App.service.AdminService;
-import com.Ecommerce_Cusomer_App.service.CategoryService;
-import com.Ecommerce_Cusomer_App.service.SubCategoryService;
-import com.Ecommerce_Cusomer_App.service.UserService;
 
 @RestController
 @RequestMapping("api/admin")
 public class AdminController {
 
-	@Autowired
-	private CategoryService categoryService;
-
-	@Autowired
-	private SubCategoryService subCategoryService;
-
-	@Autowired
-	private UserService userService;
 
 	@Autowired
 	private AdminService adminService;

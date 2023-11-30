@@ -1,8 +1,7 @@
 package com.Ecommerce_Cusomer_App.configuration;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,55 +11,63 @@ import com.Ecommerce_Cusomer_App.entity.User;
 
 public class CustomUserDetails implements UserDetails {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private String email;
-	private List<GrantedAuthority> authorities;
+    private String email;
+    private String otp;
+    private Collection<? extends GrantedAuthority> authorities;
 
-	public CustomUserDetails(User user) {
-		email = user.getEmail();
+    public CustomUserDetails(User user) {
+        this.email = user.getEmail();
+        this.otp = user.getOtp(); // Fetch OTP from User entity
 
-		authorities = new ArrayList<>();
+        // Assuming getRole() returns a single role for the user
+        String role = user.getRole();
+        this.authorities = Collections.singleton(new SimpleGrantedAuthority(role));
+    }
 
-		String role = user.getRole();
+    // Implementing UserDetails methods
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
 
-		authorities.add(new SimpleGrantedAuthority(role));
-	}
+    @Override
+    public String getPassword() {
+        return null; // Assuming no password stored or used for OTP-based authentication
+    }
 
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return authorities;
-	}
+    @Override
+    public String getUsername() {
+        return email;
+    }
 
-	@Override
-	public String getUsername() {
-		return email;
-	}
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
-	@Override
-	public boolean isAccountNonExpired() {
-		return true;
-	}
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
-	@Override
-	public boolean isAccountNonLocked() {
-		return true;
-	}
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
-	@Override
-	public boolean isCredentialsNonExpired() {
-		return true;
-	}
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 
-	@Override
-	public boolean isEnabled() {
-		return true;
-	}
+    // Getter and setter for OTP
+    public String getOtp() {
+        return otp;
+    }
 
-	@Override
-	public String getPassword() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+    public void setOtp(String otp) {
+        this.otp = otp;
+    }
 }

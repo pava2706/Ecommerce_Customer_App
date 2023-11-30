@@ -12,13 +12,13 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtils {
 
-	public static final String SECRET = "5aB3r1P8mNqRvKgY7cZxW9jF2hT6fU0eL4dS1aC3bXwVzE6tR8yH0jM5nQ8pZ2k";
+	// The secret key will be dynamically generated instead of hardcoded
+	private final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
 	public String extractUsername(String token) {
 		return extractClaim(token, Claims::getSubject);
@@ -34,7 +34,7 @@ public class JwtUtils {
 	}
 
 	private Claims extractAllClaims(String token) {
-		return Jwts.parserBuilder().setSigningKey(getSignKey()).build().parseClaimsJws(token).getBody();
+		return Jwts.parserBuilder().setSigningKey(SECRET_KEY).build().parseClaimsJws(token).getBody();
 	}
 
 	private Boolean isTokenExpired(String token) {
@@ -54,11 +54,6 @@ public class JwtUtils {
 	private String createToken(Map<String, Object> claims, String userName) {
 		return Jwts.builder().setClaims(claims).setSubject(userName).setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
-				.signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
-	}
-
-	private Key getSignKey() {
-		byte[] keyBytes = Decoders.BASE64.decode(SECRET);
-		return Keys.hmacShaKeyFor(keyBytes);
+				.signWith(SECRET_KEY, SignatureAlgorithm.HS256).compact();
 	}
 }
