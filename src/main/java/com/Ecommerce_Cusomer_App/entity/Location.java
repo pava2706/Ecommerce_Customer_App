@@ -9,7 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
-@Entity
+@Entity 
 @Data
 public class Location {
 
@@ -19,6 +19,8 @@ public class Location {
 
 	private String street;
 	private String city;
+	private int pincode; 
+	private String state;
 	private String country;
 	private double latitude;
 	private double longitude;

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor 
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GeocodingResponse {
+public class GeocodingResponse extends CommonApiResponse {
     private String status;
     private Result[] results;
 

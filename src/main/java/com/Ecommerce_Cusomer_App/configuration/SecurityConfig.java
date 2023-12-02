@@ -40,7 +40,7 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 
 						// this APIs are only accessible by CUSTOMER
-						.requestMatchers("/api/user/login", "/api/user/register")
+						.requestMatchers("/api/user/login", "/api/user/register", "/api/user/cart/add")
 						.hasAuthority(UserRole.ROLE_CUSTOMER.value())
 
 						.anyRequest().permitAll())

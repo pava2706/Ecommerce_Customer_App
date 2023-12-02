@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.Ecommerce_Cusomer_App.dto.CommonApiResponse;
+import com.Ecommerce_Cusomer_App.dto.SubCategoryResponseDto;
 import com.Ecommerce_Cusomer_App.entity.SubCategory;
 import com.Ecommerce_Cusomer_App.service.SubCategoryService;
 
@@ -26,7 +28,7 @@ public class SubCategoryController {
 	// Method to Add Category
 
 	@PostMapping("/add/{categoryid}")
-	public ResponseEntity<Object> addSubCategory(@ModelAttribute SubCategory category,
+	public ResponseEntity<CommonApiResponse> addSubCategory(@ModelAttribute SubCategory category,
 			@RequestParam("catimage") MultipartFile image, @PathVariable("categoryid") Long categoryid) {
 		return subcategoryService.addSubCategory(category, image, categoryid);
 	}
@@ -34,7 +36,7 @@ public class SubCategoryController {
 	// Method to Update Category
 
 	@PutMapping("/update/details/{categoryid}")
-	public ResponseEntity<Object> updateSubCategoryDetails(@ModelAttribute SubCategory category,
+	public ResponseEntity<CommonApiResponse> updateSubCategoryDetails(@ModelAttribute SubCategory category,
 			@PathVariable("categoryid") Long categoryid) {
 		System.out.println(category);
 		return subcategoryService.updatesubCategoryDetails(category, categoryid);
@@ -43,22 +45,22 @@ public class SubCategoryController {
 	// Method to Update CategoryImage by Category Id
 
 	@PutMapping("update/image/{categoryid}")
-	public ResponseEntity<Object> updateSubCategoryImage(Long id, @RequestParam("catimage") MultipartFile image,
-			@PathVariable("categoryid") Long categoryid) {
+	public ResponseEntity<CommonApiResponse> updateSubCategoryImage(Long id,
+			@RequestParam("catimage") MultipartFile image, @PathVariable("categoryid") Long categoryid) {
 		return subcategoryService.updateSubCategoryImage(id, image, categoryid);
 	}
 
 	// Method to fetch all Subcategories
 
 	@GetMapping("/fetch/all")
-	public ResponseEntity<Object> fetchAllSubCategory() {
+	public ResponseEntity<SubCategoryResponseDto> fetchAllSubCategory() {
 		return subcategoryService.fetchAllsubCategory();
 	}
 
 	// Method to delete Subcategory by Category Id
 
 	@DeleteMapping("/delete/byid/{subcategoryid}/{categoryid}")
-	public ResponseEntity<Object> deleteSubCategory(@PathVariable("subcategoryid") Long subcategoryId,
+	public ResponseEntity<CommonApiResponse> deleteSubCategory(@PathVariable("subcategoryid") Long subcategoryId,
 			@PathVariable("categoryid") Long categoryid) {
 		return subcategoryService.deleteSubCategory(subcategoryId, categoryid);
 	}
@@ -66,7 +68,7 @@ public class SubCategoryController {
 	// Method to delete All Subcategories
 
 	@DeleteMapping("/delete/all")
-	public ResponseEntity<Object> deleteAllSubCategory() {
+	public ResponseEntity<CommonApiResponse> deleteAllSubCategory() {
 		return subcategoryService.deleteAllSubCategory();
 	}
 
@@ -92,36 +94,38 @@ public class SubCategoryController {
 	// Method to fetch all Subcategories by Category Id
 
 	@GetMapping("/fetch/all/{categoryid}")
-	public ResponseEntity<Object> fetchAllSubCategoryByCategoryId(@PathVariable("categoryid") Long categoryid) {
+	public ResponseEntity<SubCategoryResponseDto> fetchAllSubCategoryByCategoryId(
+			@PathVariable("categoryid") Long categoryid) {
 		return subcategoryService.fetchAllsubCategoryByCategoryId(categoryid);
 	}
 
 	// Method To Fetch SubCategory Details by id
 
 	@GetMapping("fetch/byid/{id}")
-	public ResponseEntity<Object> findById(@PathVariable("id") Long id) {
+	public ResponseEntity<SubCategoryResponseDto> findById(@PathVariable("id") Long id) {
 		return subcategoryService.findById(id);
 	}
-	
-	//Method to fetch SubCategory by SubCategory Name
-	
-		@GetMapping("fetch/byname/{name}")
-		public ResponseEntity<Object> findByName(@PathVariable("name") String name) {
-			return subcategoryService.findByName(name);
-		}
-		
-		//Method to Update the Status by id
-		
-		@PostMapping("/statusupdate/{id}")
-		public ResponseEntity<Object> statusUpdate(@PathVariable("id") Long id) {
-			return subcategoryService.statusUpdate(id);
-		}
-		
-		//Method to Update the Quantity by id
-		
-				@PostMapping("/statusupdate/{id}/{quantity}")
-				public ResponseEntity<Object> updateQuantity(@PathVariable("id") Long id,@PathVariable("quantity") int quantity) {
-					return subcategoryService.updateQuantity(id,quantity);
-				}
-	
+
+	// Method to fetch SubCategory by SubCategory Name
+
+	@GetMapping("fetch/byname/{name}")
+	public ResponseEntity<SubCategoryResponseDto> findByName(@PathVariable("name") String name) {
+		return subcategoryService.findByName(name);
+	}
+
+	// Method to Update the Status by id
+
+	@PostMapping("/statusupdate/{id}")
+	public ResponseEntity<CommonApiResponse> statusUpdate(@PathVariable("id") Long id) {
+		return subcategoryService.statusUpdate(id);
+	}
+
+	// Method to Update the Quantity by id
+
+	@PostMapping("/statusupdate/{id}/{quantity}")
+	public ResponseEntity<CommonApiResponse> updateQuantity(@PathVariable("id") Long id,
+			@PathVariable("quantity") int quantity) {
+		return subcategoryService.updateQuantity(id, quantity);
+	}
+
 }

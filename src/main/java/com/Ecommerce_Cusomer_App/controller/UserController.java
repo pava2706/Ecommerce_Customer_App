@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.Ecommerce_Cusomer_App.dto.CommonApiResponse;
+import com.Ecommerce_Cusomer_App.dto.UserLoginResponse;
 import com.Ecommerce_Cusomer_App.dto.VerifyOTPRequest;
 import com.Ecommerce_Cusomer_App.entity.User;
 import com.Ecommerce_Cusomer_App.service.UserService;
@@ -22,65 +24,68 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
+	@GetMapping("/get")
+	public String home() {
+		return "welcome to Restaurant_Management app";
+	}
+
 	@PostMapping("/signup")
-	public ResponseEntity<Object> signUp(@RequestBody User user) {
+	public ResponseEntity<CommonApiResponse> signUp(@RequestBody User user) {
 
 		return userService.signUp(user);
 	}
 
 	@PostMapping("/verifyforsignup")
-	public ResponseEntity<Object> verifyOTPForSignUp(@RequestBody VerifyOTPRequest verifyOTPRequest) {
+	public ResponseEntity<CommonApiResponse> verifyOTPForSignUp(@RequestBody VerifyOTPRequest verifyOTPRequest) {
 		String phoneNumber = verifyOTPRequest.getPhoneNumber();
 		String otp = verifyOTPRequest.getOtp();
 		return userService.verifyOTPSignUp(phoneNumber, otp);
 	}
 
+	@PostMapping("/resendotp")
+	public ResponseEntity<CommonApiResponse> resendOtp(@RequestBody User user) {
+		return userService.resendOtp(user.getPhoneNumber());
+	}
+
 	@PostMapping("/signin")
-	public ResponseEntity<Object> verifyOTPForSignIn(@RequestBody User user) {
+	public ResponseEntity<CommonApiResponse> verifyOTPForSignIn(@RequestBody User user) {
 		return userService.signIn(user.getPhoneNumber());
 	}
 
 	@PostMapping("/verifyforsignin")
-	public ResponseEntity<Object> verifyOTPForSignIn(@RequestBody VerifyOTPRequest verifyOTPRequest) {
+	public ResponseEntity<UserLoginResponse> verifyOTPForSignIn(@RequestBody VerifyOTPRequest verifyOTPRequest) {
 		String phoneNumber = verifyOTPRequest.getPhoneNumber();
 		String otp = verifyOTPRequest.getOtp();
 		return userService.verifyOTPSignIn(phoneNumber, otp);
 	}
 
 	@PutMapping("/update/{id}")
-	public ResponseEntity<Object> update(@RequestBody User user, @PathVariable("id") Long id) {
+	public ResponseEntity<CommonApiResponse> update(@RequestBody User user, @PathVariable("id") Long id) {
 		return userService.update(user, id);
 	}
 
-	@PostMapping("/verifyforupdate")
-	public ResponseEntity<Object> verifyOTPForUpdate(@RequestBody VerifyOTPRequest verifyOTPRequest) {
-		String phoneNumber = verifyOTPRequest.getPhoneNumber();
-		String otp = verifyOTPRequest.getOtp();
-		return userService.verifyOTPForUpdate(phoneNumber, otp);
-	}
-
 	@PostMapping("/statusupdate/{id}")
-	public ResponseEntity<Object> statusUpdate(@PathVariable("id") Long id) {
+	public ResponseEntity<CommonApiResponse> statusUpdate(@PathVariable("id") Long id) {
 		return userService.statusUpdate(id);
 	}
 
 	@GetMapping("/get/{id}")
-	public ResponseEntity<Object> getUser(@PathVariable("id") Long id) {
+	public ResponseEntity<UserLoginResponse> getUser(@PathVariable("id") Long id) {
 		return userService.getUser(id);
 	}
 
 	@GetMapping("/getall")
-	public ResponseEntity<Object> getAllUser() {
+	public ResponseEntity<UserLoginResponse> getAllUser() {
 		return userService.getAllUser();
 	}
 
 	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<Object> deleteUser(@PathVariable("id") Long id) {
+	public ResponseEntity<CommonApiResponse> deleteUser(@PathVariable("id") Long id) {
 		return userService.deleteUser(id);
 	}
 
 	@DeleteMapping("/deleteall")
-	public ResponseEntity<Object> deleteAllUser() {
+	public ResponseEntity<CommonApiResponse> deleteAllUser() {
 		return userService.deleteAllUser();
 	}
 

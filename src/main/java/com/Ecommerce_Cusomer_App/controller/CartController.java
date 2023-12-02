@@ -2,6 +2,7 @@ package com.Ecommerce_Cusomer_App.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Ecommerce_Cusomer_App.dto.CartRequestDto;
+import com.Ecommerce_Cusomer_App.dto.CartResponseDto;
+import com.Ecommerce_Cusomer_App.dto.CommonApiResponse;
 import com.Ecommerce_Cusomer_App.service.CartService;
 
 @RestController
@@ -21,26 +24,27 @@ public class CartController {
 	@Autowired
 	private CartService cartService;
 
+	@PreAuthorize("hasRole('Customer')")
 	@PostMapping("/add")
 
-	public ResponseEntity<Object> addCategory(@RequestBody CartRequestDto request) {
+	public ResponseEntity<CommonApiResponse> addCategory(@RequestBody CartRequestDto request) {
 		return cartService.addToCart(request);
 	}
-	
-	@PutMapping("/update") 
-	
-	public ResponseEntity<Object> updateCart(@RequestBody CartRequestDto request) {
+
+	@PutMapping("/update")
+
+	public ResponseEntity<CommonApiResponse> updateCart(@RequestBody CartRequestDto request) {
 		return cartService.updateCart(request);
 	}
-	 
+
 	@DeleteMapping("/delete")
-	public ResponseEntity<Object> deleteCart(@RequestBody CartRequestDto request) {
+	public ResponseEntity<CommonApiResponse> deleteCart(@RequestBody CartRequestDto request) {
 		return cartService.deleteCart(request);
 	}
-	
+
 	@GetMapping("/fetch/{id}")
-	
-	public ResponseEntity<Object> fetchUserCart(@PathVariable("id") int userId) {
+
+	public ResponseEntity<CartResponseDto> fetchUserCart(@PathVariable("id") int userId) {
 		return cartService.fetchUserCartDetails(userId);
 	}
 

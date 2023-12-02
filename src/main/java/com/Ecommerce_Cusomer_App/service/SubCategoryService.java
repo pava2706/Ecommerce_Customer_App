@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.Ecommerce_Cusomer_App.dto.CommonApiResponse;
 import com.Ecommerce_Cusomer_App.dto.SubCategoryResponseDto;
 import com.Ecommerce_Cusomer_App.entity.Category;
 import com.Ecommerce_Cusomer_App.entity.SubCategory;
@@ -42,18 +43,23 @@ public class SubCategoryService {
 
 	// Method to Add SubCategory
 
-	public ResponseEntity<Object> addSubCategory(SubCategory category, MultipartFile image, Long categoryid) {
+	public ResponseEntity<CommonApiResponse> addSubCategory(SubCategory category, MultipartFile image,
+			Long categoryid) {
+		CommonApiResponse response = new CommonApiResponse();
 		try {
 			if (category == null || categoryid == 0) {
-				return new ResponseEntity<Object>("missing input", HttpStatus.BAD_REQUEST);
+				response.setResponseMessage("missing input");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 			SubCategory data = null;
 			Boolean flag = true;
 			Optional<Category> cate = categoryRepository.findById(categoryid);
 
 			if (cate.isEmpty()) {
-				return new ResponseEntity<Object>("No category Present,Failed to Add SubCategory Details ",
-						HttpStatus.BAD_REQUEST);
+				response.setResponseMessage("No category Present,Failed to Add SubCategory Details ");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 			Category cat = cate.get();
 			SubCategory subCategory = new SubCategory();
@@ -75,36 +81,46 @@ public class SubCategoryService {
 				subCategory.setCategory(cat);
 				subCategory.setQuantity(category.getQuantity());
 				data = subCategoryRepository.save(subCategory);
-				return CustomerUtils.getResponseEntity("Sub Category Added successfully :-------->" + data,
-						HttpStatus.OK);
+				response.setResponseMessage("Sub Category Added successfully :-------->" + data);
+				response.setSuccess(true);
+				return new ResponseEntity<>(response, HttpStatus.OK);
 			}
-			return new ResponseEntity<Object>("Category " + category.getName() + " Is Already Exists...",
-					HttpStatus.BAD_REQUEST);
+			response.setResponseMessage("Category " + category.getName() + " Is Already Exists...");
+			response.setSuccess(false);
+			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
+		response.setResponseMessage("SOMETHING_WENT_WRONG");
+		response.setSuccess(false);
+		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	// Method to Update SubCategory
 
-	public ResponseEntity<Object> updatesubCategoryDetails(SubCategory category, Long categoryid) {
+	public ResponseEntity<CommonApiResponse> updatesubCategoryDetails(SubCategory category, Long categoryid) {
+		CommonApiResponse response = new CommonApiResponse();
 		try {
 			if (category == null || categoryid == 0) {
-				return new ResponseEntity<Object>("missing input", HttpStatus.BAD_REQUEST);
+				response.setResponseMessage("missing input");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 
 			Optional<SubCategory> cate = subCategoryRepository.findById(category.getId());
 
 			if (cate.isEmpty()) {
-				return CustomerUtils.getResponseEntity("SubCategory Not Found..", HttpStatus.INTERNAL_SERVER_ERROR);
+				response.setResponseMessage("SubCategory Not Found..");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+
 			}
 			SubCategory categ = cate.get();
 			if (categoryid != categ.getCategory().getId()) {
-				return CustomerUtils.getResponseEntity(
-						"This SubCategory Not Belongs To ur Category, U Can't Update it ",
-						HttpStatus.INTERNAL_SERVER_ERROR);
+				response.setResponseMessage("This SubCategory Not Belongs To ur Category, U Can't Update it ");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 
 			categ.setName(category.getName());
@@ -117,34 +133,43 @@ public class SubCategoryService {
 			SubCategory savedCategory = subCategoryRepository.save(categ);
 
 			if (savedCategory == null) {
-				return new ResponseEntity<Object>("Failed to update category", HttpStatus.INTERNAL_SERVER_ERROR);
+				response.setResponseMessage("Failed to update category");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
-
-			return CustomerUtils.getResponseEntity("Category Updated Successful", HttpStatus.OK);
+			response.setResponseMessage("Category Updated Successful");
+			response.setSuccess(true);
+			return new ResponseEntity<>(response, HttpStatus.OK);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
-
+		response.setResponseMessage("SOMETHING_WENT_WRONG");
+		response.setSuccess(false);
+		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	// Method to Update SubCategory Image
 
-	public ResponseEntity<Object> updateSubCategoryImage(Long id, MultipartFile image, Long categoryid) {
+	public ResponseEntity<CommonApiResponse> updateSubCategoryImage(Long id, MultipartFile image, Long categoryid) {
+		CommonApiResponse response = new CommonApiResponse();
 		try {
 			if (id == 0 || categoryid == 0) {
-				return new ResponseEntity<>("missing input", HttpStatus.BAD_REQUEST);
+				response.setResponseMessage("missing input");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 			if (image == null) {
-				return new ResponseEntity<>("Image is Not Selected", HttpStatus.BAD_REQUEST);
+				response.setResponseMessage("Image is Not Selected");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 			SubCategory category = subCategoryRepository.findById(id).get();
 			String existingImage = category.getImage();
 			if (categoryid != category.getCategory().getId()) {
-				return CustomerUtils.getResponseEntity(
-						"This SubCategory Not Belongs To ur Category, U Can't Update it ",
-						HttpStatus.INTERNAL_SERVER_ERROR);
+				response.setResponseMessage("This SubCategory Not Belongs To ur Category, U Can't Update it ");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 			// store updated food image in Image Folder and give name to store in
 			// database
@@ -157,41 +182,51 @@ public class SubCategoryService {
 			SubCategory updatedCategory = subCategoryRepository.save(category);
 
 			if (updatedCategory == null) {
-				return new ResponseEntity<Object>("Failed to update Image", HttpStatus.INTERNAL_SERVER_ERROR);
+				response.setResponseMessage("Failed to update Image");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 			try {
 				storageService.delete(existingImage);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			return CustomerUtils.getResponseEntity("Category Image Updated Successful", HttpStatus.OK);
+			response.setResponseMessage("Category Image Updated Successful");
+			response.setSuccess(true);
+			return new ResponseEntity<>(response, HttpStatus.OK);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
-
+		response.setResponseMessage("SOMETHING_WENT_WRONG");
+		response.setSuccess(false);
+		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	// Method to Fetch All SubCategories
 
-	public ResponseEntity<Object> fetchAllsubCategory() {
+	public ResponseEntity<SubCategoryResponseDto> fetchAllsubCategory() {
+		SubCategoryResponseDto response = new SubCategoryResponseDto();
 		try {
-			SubCategoryResponseDto response = new SubCategoryResponseDto();
 			List<SubCategory> categories = getAllCategoriesByStatusIn(Arrays.asList(CategoryStatus.ACTIVE.value()));
 
 			if (CollectionUtils.isEmpty(categories)) {
 
-				return new ResponseEntity<Object>("No SubCategories found", HttpStatus.NOT_FOUND);
+				response.setResponseMessage("No SubCategories found");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 			}
 
 			response.setCategories(categories);
-			return new ResponseEntity<Object>(response, HttpStatus.OK);
+			response.setResponseMessage("Category Fetched Successfully");
+			response.setSuccess(true);
+			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
-
+		response.setResponseMessage("SOMETHING_WENT_WRONG");
+		response.setSuccess(false);
+		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	// Method to fetch subcategoryImage by subcategoryImageName and Category Id
@@ -230,37 +265,43 @@ public class SubCategoryService {
 
 	// Method to fetch all Subcategories by Category Id
 
-	public ResponseEntity<Object> fetchAllsubCategoryByCategoryId(Long categoryid) {
+	public ResponseEntity<SubCategoryResponseDto> fetchAllsubCategoryByCategoryId(Long categoryid) {
 
+		SubCategoryResponseDto response = new SubCategoryResponseDto();
 		try {
 			if (categoryid == 0) {
-				return new ResponseEntity<>("missing input", HttpStatus.BAD_REQUEST);
+				response.setResponseMessage("missing input");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 
 			Optional<Category> cat = categoryRepository.findById(categoryid);
 			if (cat.isEmpty()) {
-				return new ResponseEntity<>("No Category Present in this id:--> " + categoryid, HttpStatus.BAD_REQUEST);
+				response.setResponseMessage("No Category Present in this id:--> " + categoryid);
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 
 			Category catid = cat.get();
-
-			SubCategoryResponseDto response = new SubCategoryResponseDto();
 
 			List<SubCategory> subcat = getAllSubCategoriesByCategoryAndStatusIn(catid,
 					Arrays.asList(SubCategoryStatus.ACTIVE.value()));
 
 			if (CollectionUtils.isEmpty(subcat)) {
-				return new ResponseEntity<>("No SubCategories found", HttpStatus.OK);
+				response.setResponseMessage("No SubCategories found");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 
 			response.setCategories(subcat);
-
-			return new ResponseEntity<Object>(response, HttpStatus.OK);
+			response.setSuccess(true);
+			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
-
+		response.setResponseMessage("SOMETHING_WENT_WRONG");
+		response.setSuccess(false);
+		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	public List<SubCategory> getAllSubCategoriesByCategoryAndStatusIn(Category category, List<String> status) {
@@ -269,21 +310,29 @@ public class SubCategoryService {
 
 	// Method To Fetch SubCategory Details by id
 
-	public ResponseEntity<Object> findById(Long id) {
+	public ResponseEntity<SubCategoryResponseDto> findById(Long id) {
+		SubCategoryResponseDto response = new SubCategoryResponseDto();
 		try {
 			if (id == 0) {
-				return new ResponseEntity<>("missing input", HttpStatus.BAD_REQUEST);
+				response.setResponseMessage("missing input");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 			Optional<SubCategory> category = subCategoryRepository.findById(id);
 			if (category.isEmpty()) {
-				return new ResponseEntity<Object>("No SubCategories found", HttpStatus.NOT_FOUND);
+				response.setResponseMessage("No SubCategories found");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 			}
-			return new ResponseEntity<Object>(category.get(), HttpStatus.OK);
+			response.setResponseMessage("SubCategories Fetched Sucessfully");
+			response.setSuccess(true);
+			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
-
+		response.setResponseMessage("SOMETHING_WENT_WRONG");
+		response.setSuccess(false);
+		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	// Method to get All Categories By StatusIn
@@ -294,24 +343,27 @@ public class SubCategoryService {
 
 	// Method to delete Subcategory by Category Id
 
-	public ResponseEntity<Object> deleteSubCategory(Long subcategoryId, Long categoryid) {
-
+	public ResponseEntity<CommonApiResponse> deleteSubCategory(Long subcategoryId, Long categoryid) {
+		CommonApiResponse response = new CommonApiResponse();
 		try {
 			if (subcategoryId == 0 || categoryid == 0) {
-				return new ResponseEntity<Object>("missing input", HttpStatus.BAD_REQUEST);
+				response.setResponseMessage("missing input");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 
 			SubCategory category = subCategoryRepository.findById(subcategoryId).get();
 
 			if (category == null) {
-				return new ResponseEntity<Object>("SubCategory not found, failed to delete the SubCategory",
-						HttpStatus.NOT_FOUND);
+				response.setResponseMessage("SubCategory not found, failed to delete the SubCategory");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 			}
 
 			if (categoryid != category.getCategory().getId()) {
-				return CustomerUtils.getResponseEntity(
-						"This SubCategory Not Belongs To ur Category, U Can't Delete it ",
-						HttpStatus.INTERNAL_SERVER_ERROR);
+				response.setResponseMessage("This SubCategory Not Belongs To ur Category, U Can't Delete it ");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 
 			else {
@@ -319,58 +371,68 @@ public class SubCategoryService {
 				subCategoryRepository.save(category);
 				subCategoryRepository.delete(category);
 				storageService.delete(category.getImage());
-				return CustomerUtils.getResponseEntity("Category Deleted Successful", HttpStatus.OK);
+				response.setResponseMessage("Category Deleted Successful");
+				response.setSuccess(true);
+				return new ResponseEntity<>(response, HttpStatus.OK);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
-
+		response.setResponseMessage("SOMETHING_WENT_WRONG");
+		response.setSuccess(false);
+		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	// Method to delete All SubCategories
 
-	public ResponseEntity<Object> deleteAllSubCategory() {
+	public ResponseEntity<CommonApiResponse> deleteAllSubCategory() {
+		CommonApiResponse response = new CommonApiResponse();
 		try {
 			List<SubCategory> lst = subCategoryRepository.findAll();
 			if (!lst.isEmpty()) {
 				subCategoryRepository.deleteAll();
 				storageService.deleteAll();
-				return CustomerUtils.getResponseEntity("All SubCategories Deleted Successful", HttpStatus.OK);
+				response.setResponseMessage("All SubCategories Deleted Successful");
+				response.setSuccess(true);
+				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else {
-				return CustomerUtils.getResponseEntity("No SubCategories are Present To Delete",
-						HttpStatus.BAD_REQUEST);
-
+				response.setResponseMessage("No SubCategories are Present To Delete");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
+		response.setResponseMessage("SOMETHING_WENT_WRONG");
+		response.setSuccess(false);
+		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	// Method to fetch SubCategory by SubCategory Name
 
-	public ResponseEntity<Object> findByName(String name) {
+	public ResponseEntity<SubCategoryResponseDto> findByName(String name) {
+		SubCategoryResponseDto response = new SubCategoryResponseDto();
 		try {
 			List<SubCategory> categories = findByNameContainingIgnoreCaseAndStatusIn(name,
 					Arrays.asList(SubCategoryStatus.ACTIVE.value()));
 
-			SubCategoryResponseDto response = new SubCategoryResponseDto();
-
 			if (CollectionUtils.isEmpty(categories)) {
 
-				return new ResponseEntity<Object>("No Category found", HttpStatus.NOT_FOUND);
+				response.setResponseMessage("No Category found");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 			}
 
 			response.setCategories(categories);
-			System.out.println(response);
-			return new ResponseEntity<Object>(response, HttpStatus.OK);
+			response.setSuccess(true);
+			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
-
+		response.setResponseMessage("SOMETHING_WENT_WRONG");
+		response.setSuccess(false);
+		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	private List<SubCategory> findByNameContainingIgnoreCaseAndStatusIn(String name, List<String> status) {
@@ -378,15 +440,20 @@ public class SubCategoryService {
 		return subCategoryRepository.findByNameContainingIgnoreCaseAndStatusIn(name, status);
 	}
 
-	public ResponseEntity<Object> statusUpdate(Long id) {
+	public ResponseEntity<CommonApiResponse> statusUpdate(Long id) {
+		CommonApiResponse response = new CommonApiResponse();
 		try {
 			if (id == 0) {
-				return new ResponseEntity<>("Missing Input", HttpStatus.BAD_REQUEST);
+				response.setResponseMessage("missing input");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 			Optional<SubCategory> sub = subCategoryRepository.findById(id);
 
 			if (sub.isEmpty()) {
-				return new ResponseEntity<Object>("No User Found", HttpStatus.NOT_FOUND);
+				response.setResponseMessage("No User Found");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 			}
 
 			SubCategory ad = sub.get();
@@ -396,45 +463,58 @@ public class SubCategoryService {
 				ad.setStatus(UserStatus.ACTIVE.value());
 			}
 			subCategoryRepository.save(ad);
-			return new ResponseEntity<>("Status " + ad.getStatus() + " sucessfully", HttpStatus.OK);
+			response.setResponseMessage("Status " + ad.getStatus() + " sucessfully");
+			response.setSuccess(false);
+			return new ResponseEntity<>(response, HttpStatus.OK);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
-
+		response.setResponseMessage("SOMETHING_WENT_WRONG");
+		response.setSuccess(false);
+		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	public ResponseEntity<Object> updateQuantity(Long id, int quantity) {
+	public ResponseEntity<CommonApiResponse> updateQuantity(Long id, int quantity) {
+
+		CommonApiResponse response = new CommonApiResponse();
 
 		try {
 			if (id == 0) {
-				return new ResponseEntity<>("Missing Input", HttpStatus.BAD_REQUEST);
+				response.setResponseMessage("missing input");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 			SubCategory sub = subCategoryRepository.findByIdAndStatus(id, UserStatus.ACTIVE.value());
 
 			if (sub == null) {
-				return new ResponseEntity<Object>("No User Found", HttpStatus.NOT_FOUND);
+				response.setResponseMessage("No User Found");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 			}
 
 			sub.setQuantity(quantity);
 
 			SubCategory subCategory = subCategoryRepository.save(sub);
 			if (subCategory.getQuantity() != quantity) {
-				return new ResponseEntity<>("Failed to Update the quantity", HttpStatus.BAD_REQUEST);
+				response.setResponseMessage("Failed to Update the quantity");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
-			return new ResponseEntity<>("Quantity Updated sucessfully,NO of Quantity = " + subCategory.getQuantity(),
-					HttpStatus.OK);
+			response.setResponseMessage("Quantity Updated sucessfully,NO of Quantity = " + subCategory.getQuantity());
+			response.setSuccess(true);
+			return new ResponseEntity<>(response, HttpStatus.OK);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return CustomerUtils.getResponseEntity("SOMETHING_WENT_WRONG", HttpStatus.INTERNAL_SERVER_ERROR);
-
+		response.setResponseMessage("SOMETHING_WENT_WRONG");
+		response.setSuccess(false);
+		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	public SubCategory getSubCategoryById(int id) {
-		
+
 		return subCategoryRepository.getSubCategoryById(id);
 	}
 

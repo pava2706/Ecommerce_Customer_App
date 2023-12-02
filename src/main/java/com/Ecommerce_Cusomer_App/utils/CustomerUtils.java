@@ -11,9 +11,9 @@ public class CustomerUtils {
 
 	}
 
-	public static ResponseEntity<Object> getResponseEntity(String responseMessage, HttpStatus httpStatus) {
-		return new ResponseEntity<Object>(responseMessage, httpStatus);
-	}
+//	public static ResponseEntity<Object> getResponseEntity(String responseMessage, HttpStatus httpStatus) {
+//		return new ResponseEntity<Object>(responseMessage, httpStatus);
+//	}
 
 	public static ResponseEntity<byte[]> getImageResponseEntity(byte[] imageBytes, MediaType mediaType) {
 		HttpHeaders headers = new HttpHeaders();

@@ -26,8 +26,8 @@ public class User {
 	private LocalDateTime expiryTime;
 	private String Role;
 	private String status;
-
-//	private boolean signedIn; // Flag to indicate if the user is currently signed in
-//	private String sessionToken; // Token for maintaining user session
+	
+	//This will added on while ordering for communicate purpose
+		private String alternateNumber;
 
 }

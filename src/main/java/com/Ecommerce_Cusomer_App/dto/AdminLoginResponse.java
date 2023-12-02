@@ -5,7 +5,7 @@ import com.Ecommerce_Cusomer_App.entity.Admin;
 import lombok.Data;
 
 @Data
-public class AdminLoginResponse {
+public class AdminLoginResponse extends CommonApiResponse {
 
 	private Admin user;
 

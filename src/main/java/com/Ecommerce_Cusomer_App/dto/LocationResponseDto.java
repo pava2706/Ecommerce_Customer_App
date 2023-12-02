@@ -8,7 +8,9 @@ import com.Ecommerce_Cusomer_App.entity.Location;
 import lombok.Data;
 
 @Data
-public class LocationResponseDto {
+public class LocationResponseDto extends CommonApiResponse {
 
-	private List<Location> location = new ArrayList<>();
+	private List<Location> locations = new ArrayList<>();
+	
+	private Location location;
 }

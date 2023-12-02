@@ -9,7 +9,7 @@ import com.Ecommerce_Cusomer_App.entity.Cart;
 import lombok.Data;
 
 @Data
-public class CartResponseDto {
+public class CartResponseDto extends CommonApiResponse {
 
 	private List<Cart> carts = new ArrayList<>();
 

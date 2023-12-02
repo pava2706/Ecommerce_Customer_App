@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.Ecommerce_Cusomer_App.dto.CategoryResponseDto;
+import com.Ecommerce_Cusomer_App.dto.CommonApiResponse;
 import com.Ecommerce_Cusomer_App.entity.Category;
 import com.Ecommerce_Cusomer_App.service.CategoryService;
 
@@ -28,7 +30,7 @@ public class CategoryController {
 	// Method to Add Category
 
 	@PostMapping("/add")
-	public ResponseEntity<Object> addCategory(@ModelAttribute Category category,
+	public ResponseEntity<CommonApiResponse> addCategory(@ModelAttribute Category category,
 			@RequestParam("catimage") MultipartFile image) {
 		return categoryService.addCategory(category, image);
 	}
@@ -36,41 +38,41 @@ public class CategoryController {
 	// Method to Update Category
 
 	@PutMapping("/update/details")
-	public ResponseEntity<Object> updateCategoryDetails(@ModelAttribute Category category) {
-		System.out.println(category);
+	public ResponseEntity<CommonApiResponse> updateCategoryDetails(@ModelAttribute Category category) {
 		return categoryService.updateCategoryDetails(category);
 	}
 
 	// Method to Update CategoryImage
 
 	@PutMapping("update/image")
-	public ResponseEntity<Object> updateCategoryImage(Long id, @RequestParam("catimage") MultipartFile image) {
+	public ResponseEntity<CommonApiResponse> updateCategoryImage(Long id,
+			@RequestParam("catimage") MultipartFile image) {
 		return categoryService.updateCategoryImage(id, image);
 	}
 
 	// Method to fetch all category
 
 	@GetMapping("/fetch/all")
-	public ResponseEntity<Object> fetchAllCategory() {
+	public ResponseEntity<CategoryResponseDto> fetchAllCategory() {
 		return categoryService.fetchAllCategory();
 	}
 
 	// Method to delete category
 
 	@DeleteMapping("/delete/byid/{categoryid}")
-	public ResponseEntity<Object> deleteCategory(@PathVariable("categoryid") Long categoryId) {
+	public ResponseEntity<CommonApiResponse> deleteCategory(@PathVariable("categoryid") Long categoryId) {
 		return categoryService.deleteCategory(categoryId);
 	}
 
 	// Method to delete All category
 
 	@DeleteMapping("/delete/all")
-	public ResponseEntity<Object> deleteAllCategory() {
+	public ResponseEntity<CommonApiResponse> deleteAllCategory() {
 		return categoryService.deleteAllCategory();
 	}
 
-	//Method to fetch image using image name
-	
+	// Method to fetch image using image name
+
 	@GetMapping("/fetch/image/{categoryImageName}")
 	public ResponseEntity<byte[]> fetchFoodImage(@PathVariable("categoryImageName") String categoryImageName,
 			HttpServletResponse resp) {
@@ -79,22 +81,22 @@ public class CategoryController {
 
 	}
 
-	//Method to fetch Category by using id
-	
+	// Method to fetch Category by using id
+
 	@GetMapping("fetch/byid/{id}")
-	public ResponseEntity<Object> findById(@PathVariable("id") Long id) {
+	public ResponseEntity<CategoryResponseDto> findById(@PathVariable("id") Long id) {
 		return categoryService.findById(id);
 	}
-	
-    //Method to fetch Category by Category Name
-	
+
+	// Method to fetch Category by Category Name
+
 	@GetMapping("fetch/byname/{name}")
-	public ResponseEntity<Object> findByName(@PathVariable("name") String name) {
+	public ResponseEntity<CategoryResponseDto> findByName(@PathVariable("name") String name) {
 		return categoryService.findByName(name);
 	}
-	
+
 	@PostMapping("/statusupdate/{id}")
-	public ResponseEntity<Object> statusUpdate(@PathVariable("id") Long id) {
+	public ResponseEntity<CommonApiResponse> statusUpdate(@PathVariable("id") Long id) {
 		return categoryService.statusUpdate(id);
 	}
 
