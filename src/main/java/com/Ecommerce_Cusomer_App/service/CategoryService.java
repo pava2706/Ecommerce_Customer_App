@@ -242,7 +242,7 @@ public class CategoryService {
 					subCategory.setStatus(SubCategoryStatus.DEACTIVATED.value());
 				}
 			}
-
+ 
 			if (deletedCategory == null) {
 				response.setResponseMessage("Category is Not Deleted..");
 				response.setSuccess(false);

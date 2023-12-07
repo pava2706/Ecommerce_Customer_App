@@ -21,5 +21,5 @@ public interface SubCategoryRepository extends JpaRepository<SubCategory, Long> 
 
 	SubCategory findByIdAndStatus(Long id, String value);
 
-	SubCategory getSubCategoryById(int id);
+	SubCategory getSubCategoryById(Long long1);
 }

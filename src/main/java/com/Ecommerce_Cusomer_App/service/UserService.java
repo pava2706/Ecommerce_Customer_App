@@ -16,7 +16,6 @@ import com.Ecommerce_Cusomer_App.dto.CommonApiResponse;
 import com.Ecommerce_Cusomer_App.dto.UserLoginResponse;
 import com.Ecommerce_Cusomer_App.entity.User;
 import com.Ecommerce_Cusomer_App.repository.UserRepository;
-import com.Ecommerce_Cusomer_App.utils.Constants.CategoryStatus;
 import com.Ecommerce_Cusomer_App.utils.Constants.UserRole;
 import com.Ecommerce_Cusomer_App.utils.Constants.UserStatus;
 import com.Ecommerce_Cusomer_App.utils.JwtUtils;
@@ -220,7 +219,7 @@ public class UserService {
 			user.setOtp(null);
 			user.setExpiryTime(null);
 			userRepository.save(user);
-			jwtToken = jwtUtils.generateToken(user.getEmail());
+			jwtToken = jwtUtils.generateToken(user.getPhoneNumber());
 
 			// user is authenticated
 			if (jwtToken != null) {
@@ -297,14 +296,13 @@ public class UserService {
 				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 
-			Optional<User> user2 = userRepository.findByIdAndStatus(id, UserStatus.ACTIVE.value());
+			User data = userRepository.findByIdAndStatus(id, UserStatus.ACTIVE.value());
 
-			if (user2.isEmpty()) {
+			if (data == null) {
 				response.setResponseMessage("No User Found");
 				response.setSuccess(false);
 				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 			}
-			User data = user2.get();
 
 			data.setEmail(user.getEmail());
 			data.setName(user.getName());
@@ -332,15 +330,15 @@ public class UserService {
 				response.setSuccess(false);
 				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
-			Optional<User> user = userRepository.findByIdAndStatus(id, UserStatus.ACTIVE.value());
+			User user = userRepository.findByIdAndStatus(id, UserStatus.ACTIVE.value());
 
-			if (user.isEmpty()) {
+			if (user == null) {
 				response.setResponseMessage("No User Found");
 				response.setSuccess(false);
 				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 			}
 			response.setResponseMessage("User Fetched Sucessfully");
-			response.setUser(user.get());
+			response.setUser(user);
 			response.setSuccess(true);
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
@@ -355,7 +353,7 @@ public class UserService {
 	public ResponseEntity<UserLoginResponse> getAllUser() {
 		UserLoginResponse response = new UserLoginResponse();
 		try {
-			List<User> users = userRepository.findByStatusIn(Arrays.asList(CategoryStatus.ACTIVE.value()));
+			List<User> users = userRepository.findByStatusIn(Arrays.asList(UserStatus.ACTIVE.value()));
 
 			if (CollectionUtils.isEmpty(users)) {
 				response.setResponseMessage("No Users Found");
@@ -384,15 +382,15 @@ public class UserService {
 				response.setSuccess(false);
 				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
-			Optional<User> user = userRepository.findByIdAndStatus(id, UserStatus.ACTIVE.value());
+			User user = userRepository.findByIdAndStatus(id, UserStatus.ACTIVE.value());
 
-			if (user.isEmpty()) {
+			if (user == null) {
 				response.setResponseMessage("No Users Found");
 				response.setSuccess(false);
 				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 			}
-			user.get().setStatus(UserStatus.DEACTIVATED.value());
-			User user2 = userRepository.save(user.get());
+			user.setStatus(UserStatus.DEACTIVATED.value());
+			User user2 = userRepository.save(user);
 			if (user2.getStatus().contains(UserStatus.ACTIVE.value())) {
 
 				response.setResponseMessage("Unable to Delete...");
@@ -415,7 +413,7 @@ public class UserService {
 		CommonApiResponse response = new CommonApiResponse();
 
 		try {
-			List<User> users = userRepository.findByStatusIn(Arrays.asList(CategoryStatus.ACTIVE.value()));
+			List<User> users = userRepository.findByStatusIn(Arrays.asList(UserStatus.ACTIVE.value()));
 
 			if (CollectionUtils.isEmpty(users)) {
 				response.setResponseMessage("No Users found,Unable to delete");
@@ -438,8 +436,8 @@ public class UserService {
 		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	public User findByIdAndStatus(int userId, String status) {
-		return userRepository.findByIdAndStatus(userId, status);
+	public User findByIdAndStatus(Long long1, String status) {
+		return userRepository.findByIdAndStatus(long1, status);
 	}
 
 	public ResponseEntity<CommonApiResponse> resendOtp(String phoneNumber) {
@@ -476,6 +474,14 @@ public class UserService {
 		response.setResponseMessage("SOMETHING_WENT_WRONG");
 		response.setSuccess(false);
 		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	public User getUserByphoneNumberAndStatus(String phoneNumber, String status) {
+		return userRepository.findUserByphoneNumberAndStatus(phoneNumber, status);
+	}
+
+	public User getUserById(Long userId) {
+		return userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE.value());
 	}
 
 }

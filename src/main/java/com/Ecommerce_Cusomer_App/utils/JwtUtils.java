@@ -21,6 +21,7 @@ public class JwtUtils {
 	private final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
 	public String extractUsername(String token) {
+		System.out.println(SECRET_KEY);
 		return extractClaim(token, Claims::getSubject);
 	}
 

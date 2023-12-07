@@ -20,8 +20,8 @@ import com.Ecommerce_Cusomer_App.entity.Cart;
 import com.Ecommerce_Cusomer_App.entity.SubCategory;
 import com.Ecommerce_Cusomer_App.entity.User;
 import com.Ecommerce_Cusomer_App.repository.CartRepository;
+import com.Ecommerce_Cusomer_App.repository.SubCategoryRepository;
 import com.Ecommerce_Cusomer_App.utils.Constants.UserStatus;
-import com.Ecommerce_Cusomer_App.utils.CustomerUtils;
 
 import jakarta.transaction.Transactional;
 
@@ -39,6 +39,9 @@ public class CartService {
 
 	@Autowired
 	private SubCategoryService subCategoryService;
+
+	@Autowired
+	private SubCategoryRepository subCategoryRepository;
 
 	public ResponseEntity<CommonApiResponse> addToCart(CartRequestDto request) {
 
@@ -68,24 +71,52 @@ public class CartService {
 				response.setSuccess(false);
 				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
+			Boolean flag = true;
+			List<Cart> lst = cartRepository.findAll();
 
-			Cart cart = new Cart();
-			cart.setUser(user);
-			cart.setSubCategory(sub);
-			cart.setQuantity(request.getQuantity());
-			cart.setAddedTime(String.valueOf(LocalDateTime.now()));
+			for (Cart cart : lst) {
 
-			Cart savedCart = this.cartRepository.save(cart);
+				if (cart.getSubCategory().getId().equals(request.getSubCategoryId())) {
+					flag = false;
+					break;
+				}
+				flag = true;
+			}
+			if (flag) {
 
-			if (savedCart == null) {
-				response.setResponseMessage("Failed to add to cart");
+				if (sub.getQuantity() >= request.getQuantity()) {
+
+					Cart cart = new Cart();
+					cart.setUser(user);
+					cart.setSubCategory(sub);
+					cart.setQuantity(request.getQuantity());
+					cart.setAddedTime(String.valueOf(LocalDateTime.now()));
+
+					Cart savedCart = this.cartRepository.save(cart);
+
+					// TO update the Quantity in SubCategory
+
+					sub.setQuantity(sub.getQuantity() - request.getQuantity());
+					subCategoryRepository.save(sub);
+					if (savedCart == null) {
+						response.setResponseMessage("Failed to add to cart");
+						response.setSuccess(false);
+						return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+					}
+
+					response.setResponseMessage("Products Added to Cart Successful");
+					response.setSuccess(true);
+					return new ResponseEntity<>(response, HttpStatus.OK);
+				} else {
+					response.setResponseMessage("Failed to add, bcs Available Stock is :-> " + sub.getQuantity());
+					response.setSuccess(false);
+					return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+				}
+			} else {
+				response.setResponseMessage("This Product is Already Present In ur Cart...");
 				response.setSuccess(false);
 				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
-
-			response.setResponseMessage("Food Added to Cart Successful");
-			response.setSuccess(true);
-			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -123,11 +154,25 @@ public class CartService {
 			if (request.getQuantity() == 0) {
 				this.cartRepository.delete(cart);
 			} else {
-				cart.setQuantity(request.getQuantity());
-				this.cartRepository.save(cart);
-				response.setResponseMessage("User Cart Updated Successful");
-				response.setSuccess(true);
-				return new ResponseEntity<>(response, HttpStatus.OK);
+
+				SubCategory sub = this.subCategoryService.getSubCategoryById(cart.getSubCategory().getId());
+				if (request.getQuantity() <= sub.getQuantity()) {
+					cart.setQuantity(request.getQuantity());
+					this.cartRepository.save(cart);
+
+					// TO update the Quantity in SubCategory
+
+					sub.setQuantity(sub.getQuantity() - request.getQuantity());
+					subCategoryRepository.save(sub);
+
+					response.setResponseMessage("User Cart Updated Successful");
+					response.setSuccess(true);
+					return new ResponseEntity<>(response, HttpStatus.OK);
+				}
+				response.setResponseMessage(
+						"Failed to update the Cart,Ur Entered Quantity is more than Available Stock..");
+				response.setSuccess(false);
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
 			response.setResponseMessage("Failed to update the Cart");
 			response.setSuccess(false);
@@ -179,7 +224,7 @@ public class CartService {
 		}
 	}
 
-	public ResponseEntity<CartResponseDto> fetchUserCartDetails(int userId) {
+	public ResponseEntity<CartResponseDto> fetchUserCartDetails(Long userId) {
 
 		LOG.info("Request received for fetching the user cart");
 
@@ -232,6 +277,14 @@ public class CartService {
 		}
 
 		return totalAmount;
+	}
+
+	public List<Cart> findByUser(User user) {
+		return cartRepository.findByUser(user);
+	}
+
+	public void deleteCarts(List<Cart> carts) {
+		cartRepository.deleteAll(carts);
 	}
 
 }

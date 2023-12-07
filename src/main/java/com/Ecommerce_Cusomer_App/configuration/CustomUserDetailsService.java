@@ -11,7 +11,7 @@ import com.Ecommerce_Cusomer_App.service.UserService;
 import com.Ecommerce_Cusomer_App.utils.Constants.UserStatus;
 
 
-
+ 
 @Component
 public class CustomUserDetailsService implements UserDetailsService {
 
@@ -19,8 +19,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 	private UserService userService;
 
 	@Override
-	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-	    User user = this.userService.getUserByEmailAndStatus(email, UserStatus.ACTIVE.value());
+	public UserDetails loadUserByUsername(String phoneNumber) throws UsernameNotFoundException {
+		System.out.println(phoneNumber+"coming");
+	    User user = this.userService.getUserByphoneNumberAndStatus(phoneNumber, UserStatus.ACTIVE.value());
 	    CustomUserDetails customUserDetails = new CustomUserDetails(user);
 
 	    // Assuming the user entity has a field for OTP

@@ -5,11 +5,11 @@ import lombok.Data;
 @Data
 public class CartRequestDto {
 
-	private int id;
+	private Long id;
 
-	private int userId;
+	private Long userId;
 
-	private int subCategoryId;
+	private Long subCategoryId;
 
 	private int quantity;
 

@@ -44,11 +44,7 @@ public class StorageServiceImpl implements StorageService {
 	@Override
 	public Resource load(String fileName) {
 		File filePath = new File(BASEPATH, fileName);
-		System.out.println(fileName);
-		System.out.println(BASEPATH);
-		System.out.println(filePath);
 		if (filePath.exists()) {
-			System.out.println("entering");
 			return new FileSystemResource(filePath);
 		} else {
 			return null;
@@ -65,7 +61,6 @@ public class StorageServiceImpl implements StorageService {
 	@Override
 	public void deleteAll() {
 		File filePath = new File(BASEPATH);
-		System.out.println(BASEPATH);
 		filePath.delete();
 	}
 

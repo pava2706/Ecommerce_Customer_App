@@ -513,9 +513,9 @@ public class SubCategoryService {
 		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	public SubCategory getSubCategoryById(int id) {
+	public SubCategory getSubCategoryById(Long long1) {
 
-		return subCategoryRepository.getSubCategoryById(id);
+		return subCategoryRepository.getSubCategoryById(long1);
 	}
 
 }

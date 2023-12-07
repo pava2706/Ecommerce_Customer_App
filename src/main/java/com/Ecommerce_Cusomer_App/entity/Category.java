@@ -1,7 +1,5 @@
 package com.Ecommerce_Cusomer_App.entity;
 
-import com.Ecommerce_Cusomer_App.utils.Constants.CategoryStatus;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
